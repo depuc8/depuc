@@ -1,0 +1,789 @@
+<!doctype html>
+<!--
+     _
+  __| | ___ _ __  _   _  ___
+ / _` |/ _ \ '_ \| | | |/ __|
+| (_| |  __/ |_) | |_| | (__
+ \__,_|\___| .__/ \__,_|\___|
+           |_|
+
+  Reading the source. Good sign.
+  Press : on the page and type help.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>depuc(1)</title>
+<meta name="description" content="depuc: systems programmer. C, C++ and Rust projects, GNOME contributions, and a man page you can type into.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Ctext x='4' y='22' font-family='monospace' font-size='16' fill='%23bdbdbd'%3E%3E_%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=VT323&display=swap">
+<style>
+/* Layout: an 80-column man page in a plain terminal (grey on black, bold in white), with a less(1) status line pinned to the bottom */
+:root {
+  color-scheme: dark;
+  --bg: #000000;
+  --fg: #bdbdbd;
+  --bright: #ffffff;
+  --dim: #777777;
+  --rule: #262626;
+  --t0: #1a1a1a; --t1: #4d4d4d; --t2: #7f7f7f; --t3: #b0b0b0; --t4: #ececec;
+  --font-body: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-term: "VT323", "IBM Plex Mono", ui-monospace, monospace;
+  --indent: 7ch;
+  --nest: 4ch;
+  --tile: 9px;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --bg: #ffffff; --fg: #2b2b2b; --bright: #000000; --dim: #6b6b6b; --rule: #dddddd;
+    --t0: #ececec; --t1: #c2c2c2; --t2: #939393; --t3: #5c5c5c; --t4: #1c1c1c;
+  }
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #ffffff; --fg: #2b2b2b; --bright: #000000; --dim: #6b6b6b; --rule: #dddddd;
+  --t0: #ececec; --t1: #c2c2c2; --t2: #939393; --t3: #5c5c5c; --t4: #1c1c1c;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 15px/1.6 var(--font-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 2rem 6.5rem;
+  -webkit-font-smoothing: antialiased;
+}
+[hidden] { display: none !important; }
+::selection { background: var(--fg); color: var(--bg); }
+b, strong { color: var(--bright); font-weight: 600; }
+u { color: var(--bright); text-underline-offset: 3px; }
+a { color: var(--bright); text-underline-offset: 3px; text-decoration-color: var(--dim); }
+a:hover { text-decoration-color: currentColor; }
+:focus-visible { outline: 2px solid var(--bright); outline-offset: 2px; }
+p { margin: 0; }
+
+.page { max-width: 80ch; margin: 0 auto; display: flex; flex-direction: column; gap: 1.6rem; }
+
+.manhead, .manfoot { display: flex; justify-content: space-between; gap: 1ch; flex-wrap: wrap; color: var(--bright); }
+.manfoot { color: var(--dim); border-top: 1px solid var(--rule); padding-top: 1rem; }
+.manfoot .mid { text-align: center; }
+
+.logo {
+  margin: 0; font: 22px/1.05 var(--font-term); color: var(--bright);
+  overflow-x: auto;
+}
+
+.sec { display: flex; flex-direction: column; gap: 0.2rem; }
+.sec h2 { margin: 0; font-size: 1em; font-weight: 600; color: var(--bright); }
+.sec .body { padding-left: var(--indent); display: flex; flex-direction: column; gap: 0.9rem; min-width: 0; overflow-wrap: anywhere; }
+
+.opts, .contrib, .links { display: grid; grid-template-columns: max-content 1fr; column-gap: 2ch; row-gap: 0.35rem; margin: 0; }
+.opts dt, .contrib dt, .links dt { color: var(--bright); font-weight: 600; }
+.opts dd, .contrib dd, .links dd { margin: 0; min-width: 0; }
+
+.proj { display: flex; flex-direction: column; gap: 0.15rem; scroll-margin-block: 6rem; }
+.proj-head { display: flex; flex-wrap: wrap; column-gap: 1ch; }
+.proj-head .name b { padding-inline: 0.25ch; margin-inline: -0.25ch; }
+.proj.current .name b { background: var(--bright); color: var(--bg); }
+.proj > p { padding-left: var(--nest); }
+.proj .meta { color: var(--dim); display: flex; flex-wrap: wrap; column-gap: 2ch; }
+
+/* GitHub contribution tiles */
+.activity { overflow-x: auto; padding-bottom: 0.3rem; }
+.months, .tiles { display: grid; grid-auto-columns: var(--tile); gap: 3px; width: max-content; }
+.months { grid-auto-flow: column; height: 1.4em; font-size: 0.8em; color: var(--dim); }
+.months span { white-space: nowrap; }
+.tiles { grid-template-rows: repeat(7, var(--tile)); grid-auto-flow: column; }
+.tiles i { display: block; border-radius: 1px; background: var(--t0); }
+.tiles i[data-l="1"], .legend i[data-l="1"] { background: var(--t1); }
+.tiles i[data-l="2"], .legend i[data-l="2"] { background: var(--t2); }
+.tiles i[data-l="3"], .legend i[data-l="3"] { background: var(--t3); }
+.tiles i[data-l="4"], .legend i[data-l="4"] { background: var(--t4); }
+.legend { display: flex; align-items: center; gap: 3px; color: var(--dim); font-size: 0.85em; flex-wrap: wrap; }
+.legend i { display: inline-block; width: var(--tile); height: var(--tile); border-radius: 1px; background: var(--t0); }
+.legend .lbl { margin-inline: 0.5ch; }
+.legend .note { margin-left: auto; }
+
+/* less(1) status line */
+.term {
+  position: fixed; inset: auto 0 0 0; z-index: 30;
+  background: var(--bg); border-top: 1px solid var(--rule);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  font: 20px/1.25 var(--font-term);
+}
+.term-inner { max-width: 80ch; margin: 0 auto; display: flex; flex-direction: column; }
+#out {
+  margin: 0; padding-block: 0.6rem; max-height: 45vh; overflow: auto;
+  white-space: pre-wrap; overflow-wrap: anywhere; color: var(--fg);
+  border-bottom: 1px dashed var(--rule);
+}
+.statusrow { min-height: 2.1rem; display: flex; align-items: center; }
+#status {
+  all: unset; cursor: pointer; display: inline-flex; align-items: center; max-width: 100%;
+}
+#status .rev { background: var(--fg); color: var(--bg); padding-inline: 0.5ch; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#status:focus-visible { outline: 2px solid var(--bright); outline-offset: 2px; }
+.cursor { display: inline-block; width: 0.55em; height: 1em; background: var(--fg); margin-left: 0.3ch; animation: blink 1.06s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+#prompt { display: flex; align-items: center; width: 100%; gap: 0.2ch; }
+#prompt label { color: var(--bright); }
+#cmd { flex: 1; min-width: 0; background: transparent; border: 0; color: var(--bright); font: inherit; caret-color: var(--bright); padding: 0.2rem 0; }
+#cmd:focus { outline: none; }
+
+/* overlays: help screen and the 404 segfault */
+.overlay {
+  position: fixed; inset: 0; z-index: 50; background: var(--bg);
+  display: grid; place-items: center; overflow: auto;
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+}
+.dialog { border: 4px double var(--fg); padding: 1.2rem 1.6rem; max-width: 64ch; width: 100%; min-width: 0; }
+.dialog pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; }
+.dialog .btn { all: unset; cursor: pointer; color: var(--bright); margin-top: 1rem; display: inline-block; }
+.dialog .btn:hover, .dialog .btn:focus-visible { background: var(--fg); color: var(--bg); }
+.segv .sig { color: var(--bright); font-weight: 600; }
+
+/* clipd(8), the paperclip daemon */
+.clipd {
+  position: fixed; z-index: 29;
+  right: max(16px, env(safe-area-inset-right, 0px));
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 3.2rem);
+  display: flex; align-items: flex-end; gap: 1ch;
+  max-width: min(52ch, calc(100vw - 32px)); font-size: 13.5px;
+}
+.clip-art { margin: 0; order: 2; flex: none; font: 15px/1.1 var(--font-body); color: var(--bright); }
+.clip-bubble { border: 3px double var(--fg); background: var(--bg); padding: 0.7rem 0.9rem; display: flex; flex-direction: column; gap: 0.6rem; min-width: 0; }
+.clip-actions { display: flex; flex-wrap: wrap; gap: 0.2rem 1.5ch; }
+.clip-actions button { all: unset; cursor: pointer; color: var(--bright); }
+.clip-actions button:hover, .clip-actions button:focus-visible { background: var(--fg); color: var(--bg); }
+.clip-actions #clip-never { color: var(--dim); }
+
+/* CRT mode (the Konami code, or :crt) */
+.scan { position: fixed; inset: 0; pointer-events: none; z-index: 60; }
+html.crt .scan {
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,0,0,0.18) 2px 3px),
+    radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.4) 100%);
+  animation: flicker 4s infinite;
+}
+html.crt body, html.crt .term, html.crt .overlay { text-shadow: 0 0 0.45em color-mix(in srgb, var(--bright) 45%, transparent); }
+@keyframes flicker { 0%, 100% { opacity: 1; } 47% { opacity: 0.93; } 48% { opacity: 1; } 76% { opacity: 0.96; } }
+
+@media (max-width: 560px) {
+  body { font-size: 13.5px; }
+  :root { --indent: 2ch; --nest: 0ch; }
+  .manhead .mid { display: none; }
+  .logo { font-size: 19px; }
+  .opts, .contrib, .links { grid-template-columns: 1fr; }
+  .opts dd, .contrib dd, .links dd { padding-left: 2ch; margin-bottom: 0.3rem; }
+  .legend .note { margin-left: 0; flex-basis: 100%; }
+  .clip-art { font-size: 12px; }
+  #status .long { display: none; }
+  .term { font-size: 18px; }
+}
+@media (min-width: 561px) { #status .short { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .cursor, html.crt .scan { animation: none; }
+}
+</style>
+</head>
+<body>
+<div class="scan" aria-hidden="true"></div>
+
+<main class="page">
+  <header class="manhead">
+    <span>DEPUC(1)</span><span class="mid">Portfolio Manual</span><span>DEPUC(1)</span>
+  </header>
+
+  <pre class="logo" aria-label="depuc">     _
+  __| | ___ _ __  _   _  ___
+ / _` |/ _ \ '_ \| | | |/ __|
+| (_| |  __/ |_) | |_| | (__
+ \__,_|\___| .__/ \__,_|\___|
+           |_|</pre>
+
+  <section class="sec" id="name">
+    <h2>NAME</h2>
+    <div class="body">
+      <p><b>depuc</b> - writes C, C++ and Rust that survives crashes, sanitizers and code review, including <a href="#contributions">GLib's</a></p>
+    </div>
+  </section>
+
+  <section class="sec" id="synopsis">
+    <h2>SYNOPSIS</h2>
+    <div class="body">
+      <p><b>depuc</b> [<b>--systems</b>] [<b>--rust</b>] [<b>--web</b>] [<b>--open-source</b>] <u>problem</u></p>
+    </div>
+  </section>
+
+  <section class="sec" id="description">
+    <h2>DESCRIPTION</h2>
+    <div class="body">
+      <p>I like knowing how things work under the hood, and most of my projects start as a question I couldn't stop thinking about. How does a web server handle a thousand connections without a thousand threads? That became <a href="#hearth">hearth(8)</a>. What happens when a machine dies halfway through a job? That became <a href="#flowd">flowd(8)</a>. I wanted to know how Redis and malloc actually work, so I wrote <a href="#redislite">redislite(8)</a> and <a href="#dumalloc">dumalloc(3)</a>.</p>
+      <p>I also want to build open source that's useful to people. <a href="#ember">ember(1)</a> puts Wikipedia and an AI model on a laptop, so someone in a remote area with bad or no internet can still look things up and ask questions, completely offline. I also send patches to GNOME, including GLib, the core library under nearly every GNOME app.</p>
+    </div>
+  </section>
+
+  <section class="sec" id="environment">
+    <h2>ENVIRONMENT</h2>
+    <div class="body">
+      <dl class="opts">
+        <dt>SCHOOL</dt><dd>IIT Patna</dd>
+        <dt>BRANCH</dt><dd>Electrical and Electronics Engineering</dd>
+        <dt>GRADUATING</dt><dd>2028</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="sec" id="options">
+    <h2>OPTIONS</h2>
+    <div class="body">
+      <dl class="opts">
+        <dt>--systems</dt><dd>C, C++17/20, POSIX sockets, poll(2), threads, lock-free atomics</dd>
+        <dt>--rust</dt><dd>Rust, Tauri 2, SQLite</dd>
+        <dt>--web</dt><dd>TypeScript, React, Vite, Tailwind</dd>
+        <dt>--tooling</dt><dd>CMake, Make, GitHub Actions, ASan/UBSan/TSan, Docker, DynamoDB</dd>
+        <dt>--open-source</dt><dd>GNOME contributor: GLib, Epiphany, GNOME Logs</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="sec" id="projects">
+    <h2>PROJECTS</h2>
+    <div class="body">
+      <article class="proj" id="flowd">
+        <div class="proj-head"><span class="name"><b>flowd</b>(8)</span><span class="what">distributed workflow scheduler</span></div>
+        <p>Runs DAGs of tasks across any number of worker processes that coordinate only through conditional writes to DynamoDB. Workers can crash at any moment: expired leases are reclaimed by the survivors, and fencing makes sure at most one result is ever committed per task.</p>
+        <p class="meta"><span>C++20 · DynamoDB · CMake · CI</span><a href="https://github.com/depuc8/Flowd" target="_blank" rel="noopener">github.com/depuc8/Flowd</a></p>
+      </article>
+      <article class="proj" id="ember">
+        <div class="proj-head"><span class="name"><b>ember</b>(1)</span><span class="what">offline knowledge archives with a local LLM</span></div>
+        <p>Desktop app that reads Kiwix archives (Wikipedia, Project Gutenberg, Stack Exchange) and answers questions about them with a model running on your own machine. Nothing leaves the computer, and every answer cites the articles it used.</p>
+        <p class="meta"><span>Rust · Tauri 2 · React · llama.cpp</span><a href="https://github.com/depuc8/Ember" target="_blank" rel="noopener">github.com/depuc8/Ember</a></p>
+      </article>
+      <article class="proj" id="hearth">
+        <div class="proj-head"><span class="name"><b>hearth</b>(8)</span><span class="what">HTTP/1.1 server on bare POSIX sockets</span></div>
+        <p>One poll(2) loop holds every idle keep-alive connection while a fixed pool of workers answers requests, so a thousand idle clients cost no threads. About 2,400 lines and 151 tests that run clean under ASan, UBSan and TSan.</p>
+        <p class="meta"><span>C++17 · POSIX · CI · coverage</span><a href="https://github.com/depuc8/hearth" target="_blank" rel="noopener">github.com/depuc8/hearth</a></p>
+      </article>
+      <article class="proj" id="redislite">
+        <div class="proj-head"><span class="name"><b>redislite</b>(8)</span><span class="what">in-memory key-value server</span></div>
+        <p>A Redis-style server with a non-blocking event loop, a custom binary protocol, TTL expiry on a heap, and sorted sets built on an AVL tree. No external dependencies.</p>
+        <p class="meta"><span>C++17</span><a href="https://github.com/depuc8/RedisLite" target="_blank" rel="noopener">github.com/depuc8/RedisLite</a></p>
+      </article>
+      <article class="proj" id="graphplotter">
+        <div class="proj-head"><span class="name"><b>graphplotter</b>(1)</span><span class="what">type an equation, get a graph</span></div>
+        <p>Hand-written expression parser that understands implicit multiplication (<b>2x</b>, <b>x sin(x)</b>), drawn with SDL3 and free to zoom and pan.</p>
+        <p class="meta"><span>C++17 · SDL3</span><a href="https://github.com/depuc8/GraphPlotter" target="_blank" rel="noopener">github.com/depuc8/GraphPlotter</a></p>
+      </article>
+      <article class="proj" id="dumalloc">
+        <div class="proj-head"><span class="name"><b>dumalloc</b>(3)</span><span class="what">a heap allocator</span></div>
+        <p>malloc and free over a static arena: an implicit free list with first-fit placement, block splitting and coalescing.</p>
+        <p class="meta"><span>C99</span><a href="https://github.com/depuc8/dumalloc" target="_blank" rel="noopener">github.com/depuc8/dumalloc</a></p>
+      </article>
+    </div>
+  </section>
+
+  <section class="sec" id="contributions">
+    <h2>CONTRIBUTIONS</h2>
+    <div class="body">
+      <p>Merged into GNOME, as <a href="https://gitlab.gnome.org/depuc8" target="_blank" rel="noopener">depuc8</a> on gitlab.gnome.org:</p>
+      <dl class="contrib">
+        <dt>epiphany</dt><dd>Saving a web app keeps the quoting of its URL in the .desktop Exec line, parsed with g_shell_parse_argv(), and leaves unchanged apps alone. <a href="https://gitlab.gnome.org/GNOME/epiphany/-/merge_requests/2260" target="_blank" rel="noopener">!2260</a></dd>
+        <dt>glib</dt><dd>GObject now warns with g_critical() when a property sets both G_PARAM_CONSTRUCT and G_PARAM_CONSTRUCT_ONLY. <a href="https://gitlab.gnome.org/GNOME/glib/-/merge_requests/5079" target="_blank" rel="noopener">!5079</a></dd>
+        <dt>gnome-logs</dt><dd>Exported logs are written oldest first. <a href="https://gitlab.gnome.org/GNOME/gnome-logs/-/merge_requests/86" target="_blank" rel="noopener">!86</a></dd>
+        <dt>glib</dt><dd>g_ascii_strtod() underflow docs corrected to match C99/C11. <a href="https://gitlab.gnome.org/GNOME/glib/-/merge_requests/5151" target="_blank" rel="noopener">!5151</a></dd>
+        <dt>glib</dt><dd>GFileInfo docs define what counts as a backup file. <a href="https://gitlab.gnome.org/GNOME/glib/-/merge_requests/5083" target="_blank" rel="noopener">!5083</a></dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="sec" id="activity">
+    <h2>ACTIVITY</h2>
+    <div class="body">
+      <p><b data-contrib-total>282</b> contributions on <a href="https://github.com/depuc8" target="_blank" rel="noopener">GitHub</a> in the last year.</p>
+      <div class="activity" id="activity-graph" role="img" aria-label="GitHub contribution graph: 282 contributions in the last year">
+        <div class="months" id="months"></div>
+        <div class="tiles" id="tiles"></div>
+      </div>
+      <div class="legend" aria-hidden="true"><span class="lbl">Less</span><i></i><i data-l="1"></i><i data-l="2"></i><i data-l="3"></i><i data-l="4"></i><span class="lbl">More</span><span class="note" data-contrib-asof>as of 17 Nov 2026</span></div>
+    </div>
+  </section>
+
+  <section class="sec" id="history">
+    <h2>HISTORY</h2>
+    <div class="body">
+      <!-- psst: type the word money anywhere on this page -->
+      <p>It started with Need for Speed: Most Wanted. I wanted infinite cash, found it sitting in memory as a plain number, and changed it. After that, software looked like something I could open up.</p>
+      <p>Then came a Raspberry Pi Zero 2 W: low-level experiments, job scheduling, and a tiny home lab running my network.</p>
+      <p>Now I build the things I used to poke at: servers, allocators, schedulers, and patches for GNOME.</p>
+    </div>
+  </section>
+
+  <section class="sec" id="bugs">
+    <h2>BUGS</h2>
+    <div class="body">
+      <p>Will rewrite your build system if left unattended.</p>
+      <p>Has read the manual. All of it.</p>
+    </div>
+  </section>
+
+  <section class="sec" id="see-also">
+    <h2>SEE ALSO</h2>
+    <div class="body">
+      <dl class="links">
+        <dt>github(1)</dt><dd><a href="https://github.com/depuc8" target="_blank" rel="noopener">github.com/depuc8</a></dd>
+        <dt>gitlab(1)</dt><dd><a href="https://gitlab.gnome.org/depuc8" target="_blank" rel="noopener">gitlab.gnome.org/depuc8</a></dd>
+        <dt>codeforces(1)</dt><dd><a href="https://codeforces.com/profile/wherezdashame" target="_blank" rel="noopener">codeforces.com/profile/wherezdashame</a></dd>
+      </dl>
+      <p>Smaller projects: <a href="https://github.com/depuc8/huffman-compressor" target="_blank" rel="noopener">huffman-compressor(1)</a>, <a href="https://github.com/depuc8/GaussianSolver" target="_blank" rel="noopener">gaussiansolver(3)</a></p>
+    </div>
+  </section>
+
+  <footer class="manfoot">
+    <span>depuc 2026.11</span>
+    <span class="mid">up <span data-uptime>0</span> days, load average: 0.42, 0.42, 0.42</span>
+    <span>DEPUC(1)</span>
+  </footer>
+</main>
+
+<div class="term">
+  <div class="term-inner">
+    <pre id="out" hidden aria-live="polite"></pre>
+    <div class="statusrow">
+      <button id="status" type="button" aria-label="Open the command line">
+        <span class="rev"><span class="long">Manual page depuc(1) line <span id="line">1</span>/<span id="total">1</span><span id="end" hidden> (END)</span> (press : for commands, ? for help)</span><span class="short">depuc(1) line <span id="line-s">1</span> · tap for commands</span></span><span class="cursor" aria-hidden="true"></span>
+      </button>
+      <form id="prompt" hidden autocomplete="off">
+        <label for="cmd">:</label><input id="cmd" name="cmd" type="text" spellcheck="false" autocapitalize="off" aria-label="Command">
+      </form>
+    </div>
+  </div>
+</div>
+
+<aside class="clipd" id="clipd" hidden aria-live="polite" aria-label="clipd, the paperclip">
+<pre class="clip-art" aria-hidden="true"> ____
+/ __ \
+|/  \|
+<span id="clip-eyes">|@  @|</span>
+||  ||
+||  ||
+|\__/|
+\____/</pre>
+  <div class="clip-bubble">
+    <p id="clip-msg"></p>
+    <div class="clip-actions">
+      <button type="button" id="clip-yes">[ yes ]</button>
+      <button type="button" id="clip-no">[ no ]</button>
+      <button type="button" id="clip-never">[ don't show again ]</button>
+    </div>
+  </div>
+</aside>
+
+<div class="overlay" id="help" hidden role="dialog" aria-modal="true" aria-label="Keyboard help">
+  <div class="dialog">
+<pre><b>KEYS</b>
+
+  j / k     next / previous project
+  g / G     top / bottom
+  t         switch light / dark
+  :         command line (start with help)
+  ?         this screen
+  Esc       close
+
+Some things are not on this list.</pre>
+    <button class="btn" type="button" data-close>[ close ]</button>
+  </div>
+</div>
+
+<div class="overlay" id="segv" hidden role="dialog" aria-modal="true" aria-label="Page not found">
+  <div class="dialog segv">
+<pre><span class="sig">Segmentation fault (core dumped)</span>
+
+Program received signal SIGSEGV, Segmentation fault.
+0x000055555555a1c4 in my_malloc (size=404) at src/heap.c:404
+404         block-&gt;next = page;
+(gdb) bt
+#0  my_malloc (size=404) at src/heap.c:404
+#1  route_request (path=<span id="segv-path">"/this-page"</span>) at src/router.cpp:88
+#2  main () at src/main.cpp:12
+
+The page you asked for does not exist.</pre>
+    <button class="btn" type="button" data-close>(gdb) continue</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const root = document.documentElement;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // uptime since the first commit across the repos
+  const FIRST_COMMIT = new Date('2025-12-11T00:00:00');
+  const days = Math.max(0, Math.floor((Date.now() - FIRST_COMMIT) / 864e5));
+  document.querySelectorAll('[data-uptime]').forEach((el) => { el.textContent = days; });
+
+  const LOGO = $('.logo').textContent;
+  console.log('%c' + LOGO + '\n\nReading the console? We should talk.\nLinks are under SEE ALSO, or press : and type help.',
+    'color:#bdbdbd;font-family:monospace;font-size:12px;line-height:1.2');
+
+  // GitHub contribution levels (0-4), one per day from a Sunday.
+  // activity:start (rewritten daily by scripts/update_activity.py)
+  const ACTIVITY = {"start": "2025-11-16", "total": 282, "levels": "0000000000000000000011000111110111111011110110011110100000000000001100000000000000000010000000000000000000001000000000000000000000101111000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000032400000000000000000110001100100110101022011001100300111012011001001101100110010021110011101101101010110111011111111111142111111003012"};
+  // activity:end
+  (function drawActivity() {
+    const tiles = $('#tiles'), months = $('#months');
+    const start = new Date(ACTIVITY.start + 'T00:00:00');
+    const fmt = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short', year: 'numeric' });
+    const frag = document.createDocumentFragment();
+    let lastMonth = -1;
+    [...ACTIVITY.levels].forEach((l, i) => {
+      const d = new Date(start); d.setDate(start.getDate() + i);
+      const t = document.createElement('i');
+      if (l !== '0') t.dataset.l = l;
+      t.title = fmt.format(d);
+      frag.appendChild(t);
+      if (i % 7 === 0 && d.getMonth() !== lastMonth) {
+        const week = i / 7;
+        lastMonth = d.getMonth();
+        if (week > 0 && week < Math.ceil(ACTIVITY.levels.length / 7) - 2) {
+          const m = document.createElement('span');
+          m.textContent = d.toLocaleString('en', { month: 'short' });
+          m.style.gridColumn = (week + 1) + ' / span 4';
+          months.appendChild(m);
+        }
+      }
+    });
+    tiles.appendChild(frag);
+    const wrap = $('#activity-graph');
+    wrap.scrollLeft = wrap.scrollWidth;
+  })();
+
+  // j / k between projects
+  const projects = [...document.querySelectorAll('.proj')];
+  let cur = -1;
+  function focusProj(i) {
+    cur = (i + projects.length) % projects.length;
+    projects.forEach((p, k) => p.classList.toggle('current', k === cur));
+    projects[cur].scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
+  }
+
+  // less(1)-style line counter
+  const lineEl = $('#line'), lineS = $('#line-s'), totalEl = $('#total'), endEl = $('#end');
+  function updateStatus() {
+    const lh = parseFloat(getComputedStyle(document.body).lineHeight) || 24;
+    const H = root.scrollHeight;
+    const total = Math.max(1, Math.round(H / lh));
+    const atEnd = innerHeight + scrollY >= H - 2;
+    const line = atEnd ? total : Math.min(total, Math.round(scrollY / lh) + 1);
+    lineEl.textContent = line; lineS.textContent = line; totalEl.textContent = total;
+    endEl.hidden = !atEnd;
+  }
+  let ticking = false;
+  addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => { updateStatus(); ticking = false; });
+  }, { passive: true });
+  addEventListener('resize', updateStatus);
+  updateStatus();
+
+  // theme
+  const isDark = () => root.dataset.theme ? root.dataset.theme === 'dark' : !matchMedia('(prefers-color-scheme: light)').matches;
+  const setTheme = (t) => { root.dataset.theme = t; };
+  const toggleCrt = () => root.classList.toggle('crt');
+
+  // overlays
+  const help = $('#help'), segv = $('#segv');
+  function showSegv(path) {
+    $('#segv-path').textContent = JSON.stringify(path || '/this-page');
+    segv.hidden = false;
+    segv.querySelector('[data-close]').focus();
+  }
+  document.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => {
+    b.closest('.overlay').hidden = true;
+  }));
+
+  // command line
+  const statusBtn = $('#status'), form = $('#prompt'), input = $('#cmd'), out = $('#out');
+  const hist = [];
+  let hi = 0;
+  function openPrompt(prefill) {
+    statusBtn.hidden = true; form.hidden = false; input.value = typeof prefill === 'string' ? prefill : ''; hi = hist.length; input.focus();
+  }
+  function closePrompt() {
+    form.hidden = true; statusBtn.hidden = false; input.blur();
+  }
+  function print(cmd, text, link) {
+    if (out.hidden) out.textContent = '';
+    if (out.textContent) out.append('\n\n');
+    out.append(':' + cmd + (text ? '\n' + text : ''));
+    if (link) {
+      const a = document.createElement('a');
+      a.href = link; a.target = '_blank'; a.rel = 'noopener';
+      a.textContent = link.replace(/^https:\/\//, '');
+      out.append(a);
+    }
+    out.hidden = false;
+    out.scrollTop = out.scrollHeight;
+  }
+
+  const names = projects.map((p) => p.id);
+
+  // cd targets: every project's repo, plus the SEE ALSO links
+  const LINKS = {};
+  projects.forEach((p) => { const a = p.querySelector('.meta a'); if (a) LINKS[p.id] = a.href; });
+  document.querySelectorAll('#see-also a').forEach((a) => {
+    const dt = a.closest('dd') && a.closest('dd').previousElementSibling;
+    LINKS[(dt ? dt.textContent : a.textContent).replace(/\(\d\)$/, '').toLowerCase()] = a.href;
+  });
+  function openUrl(url) {
+    const a = document.createElement('a');
+    a.href = url; a.target = '_blank'; a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+  const ABOUT = $('#description .body').innerText.trim();
+  const neofetch = () => {
+    const art = LOGO.split('\n');
+    const info = [
+      'depuc@portfolio', '---------------',
+      'OS: man-db (portfolio edition)', 'Shell: less(1)',
+      'Uptime: ' + days + ' days', 'Languages: C, C++, Rust, TypeScript',
+      'Projects: ' + projects.length + ' pinned, 1 distributed', 'School: IIT Patna, class of 2028',
+    ];
+    const n = Math.max(art.length, info.length);
+    return Array.from({ length: n }, (_, i) => (art[i] || '').padEnd(32) + (info[i] || '')).join('\n');
+  };
+
+  const commands = {
+    help: () => [
+      'commands:',
+      '  ls                 list projects',
+      '  man <project>      jump to a project',
+      '  cd <project>       open its repo',
+      '  cat about          print the description',
+      '  whoami, uptime, date, uname, neofetch, history',
+      '  theme [light|dark] switch theme',
+      '  clear              clear this output',
+      '  q                  close the command line',
+      '',
+      'and a few that are not listed.',
+    ].join('\n'),
+    ls: (a) => a.includes('-a')
+      ? Object.keys(LINKS).map((n) => n + '/').join('  ')
+      : names.map((n) => n + '/').join('  '),
+    man: (a) => {
+      if (!a[0]) return "What manual page do you want?\nFor example, try 'man flowd'.";
+      const i = names.indexOf(a[0].toLowerCase().replace(/\(\d\)$/, ''));
+      if (i < 0) return 'No manual entry for ' + a[0];
+      focusProj(i);
+      return '';
+    },
+    cat: (a) => {
+      if (!a[0]) return 'cat: missing operand';
+      if (/^about(\.txt)?$/i.test(a[0])) return ABOUT;
+      return 'cat: ' + a[0] + ': No such file or directory';
+    },
+    whoami: () => 'depuc',
+    uptime: () => ' ' + new Date().toTimeString().slice(0, 8) + ' up ' + days + ' days,  1 user,  load average: 0.42, 0.42, 0.42',
+    date: () => new Date().toString(),
+    uname: (a) => a.includes('-a') ? 'Linux portfolio 2026.11-depuc #1 SMP PREEMPT_DYNAMIC x86_64 GNU/Linux' : 'Linux',
+    neofetch,
+    history: () => hist.map((h, i) => String(i + 1).padStart(5) + '  ' + h).join('\n'),
+    echo: (a) => a.join(' '),
+    theme: (a) => {
+      const t = a[0] === 'light' || a[0] === 'dark' ? a[0] : (isDark() ? 'light' : 'dark');
+      setTheme(t);
+      return 'theme: ' + t;
+    },
+    clear: () => { out.textContent = ''; out.hidden = true; return null; },
+    q: () => { closePrompt(); return null; },
+    // not in help
+    sudo: (a) => a.join(' ').includes('hire')
+      ? 'depuc is not in the sudoers file. This incident will be reported.\n\n(Reaching out on GitHub works better. See SEE ALSO.)'
+      : '[sudo] password for guest:\nSorry, try again.',
+    make: (a) => !a[0]
+      ? 'make: *** No targets specified and no makefile found.  Stop.'
+      : "make: *** No rule to make target '" + a[0] + "'.  Stop.",
+    rm: (a) => a.some((x) => x.startsWith('-') && x.includes('r')) && a.includes('/')
+      ? "rm: it is dangerous to operate recursively on '/'\nrm: use --no-preserve-root to override this failsafe"
+      : 'rm: missing operand',
+    vim: () => "You're already in less(1). One modal program at a time.",
+    crt: () => (toggleCrt(), 'crt: ' + (root.classList.contains('crt') ? 'on' : 'off')),
+    cd: (a) => {
+      const t = (a[0] || '~').toLowerCase().replace(/\/+$/, '').replace(/\(\d\)$/, '');
+      if (t === '~' || t === '' || t === '.') { scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); return null; }
+      if (t === '..') return 'cd: you are already at the top of depuc(1)';
+      const url = LINKS[t];
+      if (!url) { showSegv('/' + t); return null; }
+      openUrl(url);
+      return { text: 'opening ', link: url };
+    },
+    '404': () => { showSegv('/this-page'); return null; },
+    ':q': () => 'E492: Not an editor command. Try q.',
+    scanmem: () => { cashHack(); return null; },
+    clipd: () => { closePrompt(); showClip(); return null; },
+  };
+  Object.assign(commands, {
+    exit: commands.q, quit: commands.q, vi: commands.vim, nvim: commands.vim, emacs: commands.vim,
+    ':wq': commands[':q'], ':q!': commands[':q'], segv: commands['404'],
+  });
+
+  // type "money" anywhere: the Need for Speed memory hack from HISTORY
+  let hacking = false;
+  function cashHack() {
+    if (hacking) return;
+    hacking = true;
+    const lines = [
+      '$ scanmem speed.exe',
+      'scanmem version 0.17',
+      '> 4500',
+      'info: we currently have 38114 matches.',
+      '(buy a spoiler. cash is now 3200)',
+      '> 3200',
+      'info: we currently have 1 matches.',
+      'info: match identified, use "set" to modify value.',
+      '> set 9999999',
+      'info: setting *0x0071a3f0 to 0x98967f...',
+      '',
+      'cash: $3,200 -> $9,999,999. you are rich.',
+    ];
+    const base = out.hidden || !out.textContent ? '' : out.textContent + '\n\n';
+    out.hidden = false;
+    let i = reduce ? lines.length - 1 : 0;
+    const step = () => {
+      i++;
+      out.textContent = base + lines.slice(0, i).join('\n');
+      out.scrollTop = out.scrollHeight;
+      if (i < lines.length) setTimeout(step, 280);
+      else hacking = false;
+    };
+    step();
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const line = input.value.trim();
+    input.value = '';
+    if (!line) { closePrompt(); return; }
+    hist.push(line); hi = hist.length;
+    const [name, ...args] = line.split(/\s+/);
+    const fn = commands[name] || commands[name.toLowerCase()];
+    const res = fn ? fn(args) : name + ': command not found';
+    if (res !== null) {
+      if (typeof res === 'object') print(line, res.text, res.link);
+      else print(line, res);
+    }
+  });
+
+  // clipd(8): a paperclip daemon that comments on whatever section is on screen
+  const clip = $('#clipd'), clipMsg = $('#clip-msg'), clipYes = $('#clip-yes'), clipNo = $('#clip-no'), clipEyes = $('#clip-eyes');
+  let clipNever = false, clipShown = false, clipAction = null;
+  try { clipNever = localStorage.getItem('clipd-never') === '1'; } catch (_) {}
+  const TIPS = {
+    top: { msg: "It looks like you're reading a man page. Would you like help?", act: () => { help.hidden = false; help.querySelector('[data-close]').focus(); } },
+    environment: { msg: "It looks like you're checking the graduation year. Internships count too, you know." },
+    options: { msg: "It looks like you're scanning for keywords. They're all in OPTIONS." },
+    projects: { msg: "It looks like you're evaluating a candidate. Would you like help?", act: () => openPrompt('sudo hire depuc') },
+    contributions: { msg: "It looks like you found the GLib patches. Those got past GLib's reviewers. Just saying." },
+    activity: { msg: ACTIVITY.total + ' contributions. Would you like me to count them again?', act: () => sayClip("1, 2, 3, 4... I'll get back to you.") },
+    history: { msg: "It looks like you're reading someone's backstory. Don't worry, it's three paragraphs." },
+    end: { msg: 'It looks like you reached the end. Most people never read this far.' },
+    mash: { msg: "It looks like you're having trouble. Have you tried pressing ?" },
+  };
+  const SECTION_TIP = {
+    name: 'top', synopsis: 'top', description: 'top', environment: 'environment', options: 'options',
+    projects: 'projects', contributions: 'contributions', activity: 'activity', history: 'history', bugs: 'end', 'see-also': 'end',
+  };
+  function currentTip() {
+    let id = 'name';
+    document.querySelectorAll('.sec').forEach((s) => { if (s.getBoundingClientRect().top < innerHeight * 0.45) id = s.id; });
+    return TIPS[SECTION_TIP[id] || 'top'];
+  }
+  function sayClip(msg, act) {
+    clipMsg.textContent = msg;
+    clipAction = act || null;
+    clipYes.hidden = !act;
+    clipNo.textContent = act ? '[ no ]' : '[ ok ]';
+    clip.hidden = false;
+    clipShown = true;
+  }
+  function showClip(tip) { const t = tip || currentTip(); sayClip(t.msg, t.act); }
+  function hideClip() { clip.hidden = true; }
+  clipYes.addEventListener('click', () => { const a = clipAction; hideClip(); if (a) a(); });
+  clipNo.addEventListener('click', hideClip);
+  $('#clip-never').addEventListener('click', () => {
+    clipNever = true;
+    try { localStorage.setItem('clipd-never', '1'); } catch (_) {}
+    hideClip();
+  });
+  setTimeout(() => { if (!clipNever && !clipShown && help.hidden && segv.hidden) showClip(); }, 8000);
+  if (!reduce) {
+    setInterval(() => {
+      if (clip.hidden) return;
+      clipEyes.textContent = '|-  -|';
+      setTimeout(() => { clipEyes.textContent = '|@  @|'; }, 160);
+    }, 4200);
+  }
+
+  // keys
+  const KONAMI = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'];
+  let kpos = 0;
+  let typed = '';
+  let mash = [], mashed = false;
+  addEventListener('keydown', (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (!segv.hidden) { if (e.key === 'Escape' || e.key === 'q') { segv.hidden = true; } return; }
+    if (!help.hidden) {
+      if (e.key === 'Escape' || e.key === '?' || e.key === 'q') { e.preventDefault(); help.hidden = true; }
+      return;
+    }
+    if (document.activeElement === input) {
+      if (e.key === 'Escape') closePrompt();
+      else if (e.key === 'ArrowUp' && hist.length) { e.preventDefault(); hi = Math.max(0, hi - 1); input.value = hist[hi]; }
+      else if (e.key === 'ArrowDown' && hist.length) { e.preventDefault(); hi = Math.min(hist.length, hi + 1); input.value = hist[hi] || ''; }
+      return;
+    }
+    const k = e.key.toLowerCase();
+    kpos = k === KONAMI[kpos] ? kpos + 1 : (k === KONAMI[0] ? 1 : 0);
+    if (kpos === KONAMI.length) { kpos = 0; toggleCrt(); }
+    typed = (typed + (e.key.length === 1 ? k : '')).slice(-5);
+    if (typed === 'money') { typed = ''; cashHack(); }
+    if (e.key.length === 1 && !':?jkgGt'.includes(e.key)) {
+      const now = Date.now();
+      mash = mash.filter((t) => now - t < 1500);
+      mash.push(now);
+      if (mash.length >= 10 && !mashed && !clipNever) { mashed = true; showClip(TIPS.mash); }
+    }
+
+    switch (e.key) {
+      case ':': e.preventDefault(); openPrompt(); break;
+      case '?': help.hidden = false; help.querySelector('[data-close]').focus(); break;
+      case 'j': focusProj(cur + 1); break;
+      case 'k': focusProj(cur < 0 ? projects.length - 1 : cur - 1); break;
+      case 'g': scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); break;
+      case 'G': scrollTo({ top: root.scrollHeight, behavior: reduce ? 'auto' : 'smooth' }); break;
+      case 't': setTheme(isDark() ? 'light' : 'dark'); break;
+      case 'Escape':
+        out.hidden = true;
+        hideClip();
+        projects.forEach((p) => p.classList.remove('current'));
+        cur = -1;
+        break;
+    }
+  });
+  statusBtn.addEventListener('click', openPrompt);
+})();
+</script>
+</body>
+</html>

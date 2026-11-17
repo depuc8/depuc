@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Segmentation fault</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Ctext x='4' y='22' font-family='monospace' font-size='16' fill='%23bdbdbd'%3E%3E_%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #000000; --fg: #bdbdbd; --bright: #ffffff;
+  --font-body: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: light) {
+  :root { color-scheme: light; --bg: #ffffff; --fg: #2b2b2b; --bright: #000000; }
+}
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.6 var(--font-body);
+  display: grid; place-items: center;
+  padding: 16px max(16px, env(safe-area-inset-right, 0px)) 16px max(16px, env(safe-area-inset-left, 0px));
+  box-sizing: border-box;
+}
+.dialog { border: 4px double var(--fg); padding: 1.2rem 1.6rem; max-width: 64ch; width: 100%; box-sizing: border-box; }
+pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; }
+.sig { color: var(--bright); font-weight: 600; }
+a { color: var(--bright); display: inline-block; margin-top: 1rem; text-decoration: none; }
+a:hover, a:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
+@media (max-width: 560px) { body { font-size: 13.5px; } }
+</style>
+</head>
+<body>
+<div class="dialog">
+<pre><span class="sig">Segmentation fault (core dumped)</span>
+
+Program received signal SIGSEGV, Segmentation fault.
+0x000055555555a1c4 in my_malloc (size=404) at src/heap.c:404
+404         block-&gt;next = page;
+(gdb) bt
+#0  my_malloc (size=404) at src/heap.c:404
+#1  route_request (path=<span id="path">"/this-page"</span>) at src/router.cpp:88
+#2  main () at src/main.cpp:12
+
+The page you asked for does not exist.</pre>
+<a id="home" href="/depuc/">(gdb) continue</a>
+</div>
+<script>
+  // On github.io the site lives under /<repo>/; on a custom domain it lives at /.
+  const repo = location.hostname.endsWith('github.io') ? '/' + location.pathname.split('/')[1] + '/' : '/';
+  document.getElementById('home').href = repo;
+  document.getElementById('path').textContent = JSON.stringify(location.pathname);
+  addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === 'q' || e.key === 'Escape') location.href = repo; });
+</script>
+</body>
+</html>
