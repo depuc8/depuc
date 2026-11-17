@@ -14,8 +14,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>depuc(1)</title>
-<meta name="description" content="depuc: systems programmer. C, C++ and Rust projects, GNOME contributions, and a man page you can type into.">
+<title>depuc(1) - Praveen Deepak Koripalli</title>
+<meta name="description" content="depuc (Praveen Deepak Koripalli): systems programmer. C, C++ and Rust projects, GNOME contributions, and a man page you can type into.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Ctext x='4' y='22' font-family='monospace' font-size='16' fill='%23bdbdbd'%3E%3E_%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -219,14 +219,14 @@ html.crt body, html.crt .term, html.crt .overlay { text-shadow: 0 0 0.45em color
   <section class="sec" id="synopsis">
     <h2>SYNOPSIS</h2>
     <div class="body">
-      <p><b>depuc</b> [<b>--systems</b>] [<b>--rust</b>] [<b>--web</b>] [<b>--open-source</b>] <u>problem</u></p>
+      <p><b>depuc</b> [<b>--systems</b>] [<b>--rust</b>] [<b>--scripting</b>] [<b>--web</b>] [<b>--open-source</b>] <u>problem</u></p>
     </div>
   </section>
 
   <section class="sec" id="description">
     <h2>DESCRIPTION</h2>
     <div class="body">
-      <p>I like knowing how things work under the hood, and most of my projects start as a question I couldn't stop thinking about. How does a web server handle a thousand connections without a thousand threads? That became <a href="#hearth">hearth(8)</a>. What happens when a machine dies halfway through a job? That became <a href="#flowd">flowd(8)</a>. I wanted to know how Redis and malloc actually work, so I wrote <a href="#redislite">redislite(8)</a> and <a href="#dumalloc">dumalloc(3)</a>.</p>
+      <p>I like knowing how things work under the hood, and most of my projects start as a question I couldn't stop thinking about. How does a web server handle a thousand connections without a thousand threads? That became <a href="#hearth">hearth(8)</a>. What happens when a machine dies halfway through a job? That became <a href="#flowd">flowd(8)</a>. Why is the loudest error in an outage so rarely the cause? That became <a href="#logsleuth">logsleuth(1)</a>. I wanted to know how Redis and malloc actually work, so I wrote <a href="#redislite">redislite(8)</a> and <a href="#dumalloc">dumalloc(3)</a>.</p>
       <p>I also want to build open source that's useful to people. <a href="#ember">ember(1)</a> puts Wikipedia and an AI model on a laptop, so someone in a remote area with bad or no internet can still look things up and ask questions, completely offline. I also send patches to GNOME, including GLib, the core library under nearly every GNOME app.</p>
     </div>
   </section>
@@ -236,6 +236,7 @@ html.crt body, html.crt .term, html.crt .overlay { text-shadow: 0 0 0.45em color
     <div class="body">
       <dl class="opts">
         <dt>SCHOOL</dt><dd>IIT Patna</dd>
+        <dt>DEGREE</dt><dd>Dual degree, B.Tech and M.Tech</dd>
         <dt>BRANCH</dt><dd>Electrical and Electronics Engineering</dd>
         <dt>GRADUATING</dt><dd>2028</dd>
       </dl>
@@ -247,9 +248,11 @@ html.crt body, html.crt .term, html.crt .overlay { text-shadow: 0 0 0.45em color
     <div class="body">
       <dl class="opts">
         <dt>--systems</dt><dd>C, C++17/20, POSIX sockets, poll(2), threads, lock-free atomics</dd>
-        <dt>--rust</dt><dd>Rust, Tauri 2, SQLite</dd>
-        <dt>--web</dt><dd>TypeScript, React, Vite, Tailwind</dd>
-        <dt>--tooling</dt><dd>CMake, Make, GitHub Actions, ASan/UBSan/TSan, Docker, DynamoDB</dd>
+        <dt>--rust</dt><dd>Rust, Tauri 2</dd>
+        <dt>--scripting</dt><dd>Python, Bash, awk, sed</dd>
+        <dt>--web</dt><dd>TypeScript, JavaScript, React, Node.js, Vite, Tailwind</dd>
+        <dt>--data</dt><dd>AWS (DynamoDB, S3, EC2), PostgreSQL, SQLite, SQL</dd>
+        <dt>--tooling</dt><dd>CMake, Meson, Make, GitHub Actions, GoogleTest, GDB, ASan/UBSan/TSan, Docker</dd>
         <dt>--open-source</dt><dd>GNOME contributor: GLib, Epiphany, GNOME Logs</dd>
       </dl>
     </div>
@@ -277,6 +280,11 @@ html.crt body, html.crt .term, html.crt .overlay { text-shadow: 0 0 0.45em color
         <div class="proj-head"><span class="name"><b>redislite</b>(8)</span><span class="what">in-memory key-value server</span></div>
         <p>A Redis-style server with a non-blocking event loop, a custom binary protocol, TTL expiry on a heap, and sorted sets built on an AVL tree. No external dependencies.</p>
         <p class="meta"><span>C++17</span><a href="https://github.com/depuc8/RedisLite" target="_blank" rel="noopener">github.com/depuc8/RedisLite</a></p>
+      </article>
+      <article class="proj" id="logsleuth">
+        <div class="proj-head"><span class="name"><b>logsleuth</b>(1)</span><span class="what">log analyzer and root-cause finder</span></div>
+        <p>Point it at syslog and app logs: awk parses them into one stream, sed collapses messages into signatures, and spikes are flagged against a median/MAD baseline. The RCA report names the first thing that went abnormal, not the loudest.</p>
+        <p class="meta"><span>Bash · awk · sed · Python</span><a href="https://github.com/depuc8/LogSleuth" target="_blank" rel="noopener">github.com/depuc8/LogSleuth</a></p>
       </article>
       <article class="proj" id="graphplotter">
         <div class="proj-head"><span class="name"><b>graphplotter</b>(1)</span><span class="what">type an equation, get a graph</span></div>
@@ -332,6 +340,17 @@ html.crt body, html.crt .term, html.crt .overlay { text-shadow: 0 0 0.45em color
     <div class="body">
       <p>Will rewrite your build system if left unattended.</p>
       <p>Has read the manual. All of it.</p>
+    </div>
+  </section>
+
+  <section class="sec" id="author">
+    <h2>AUTHOR</h2>
+    <div class="body">
+      <p>Praveen Deepak Koripalli, aka <b>depuc</b> &lt;<a href="mailto:koripallipraveendeepak@gmail.com">koripallipraveendeepak@gmail.com</a>&gt;</p>
+      <dl class="opts">
+        <dt>RESUME</dt><dd><a href="resume.pdf" target="_blank" rel="noopener">resume.pdf</a></dd>
+        <dt>PGP</dt><dd><a href="depuc.asc">D675 E3FE 57DF 2E87 7CDB  CB04 CEF0 7E68 9112 24AC</a></dd>
+      </dl>
     </div>
   </section>
 
@@ -432,7 +451,7 @@ The page you asked for does not exist.</pre>
   document.querySelectorAll('[data-uptime]').forEach((el) => { el.textContent = days; });
 
   const LOGO = $('.logo').textContent;
-  console.log('%c' + LOGO + '\n\nReading the console? We should talk.\nLinks are under SEE ALSO, or press : and type help.',
+  console.log('%c' + LOGO + '\n\nReading the console? We should talk: koripallipraveendeepak@gmail.com\nOr press : and type help.',
     'color:#bdbdbd;font-family:monospace;font-size:12px;line-height:1.2');
 
   // GitHub contribution levels (0-4), one per day from a Sunday.
@@ -553,12 +572,15 @@ The page you asked for does not exist.</pre>
     a.remove();
   }
   const ABOUT = $('#description .body').innerText.trim();
+  const EMAIL = 'koripallipraveendeepak@gmail.com';
+  const FPR = 'D675 E3FE 57DF 2E87 7CDB  CB04 CEF0 7E68 9112 24AC';
+  const RESUME = new URL('resume.pdf', location.href).href, KEY = new URL('depuc.asc', location.href).href;
   const neofetch = () => {
     const art = LOGO.split('\n');
     const info = [
       'depuc@portfolio', '---------------',
       'OS: man-db (portfolio edition)', 'Shell: less(1)',
-      'Uptime: ' + days + ' days', 'Languages: C, C++, Rust, TypeScript',
+      'Uptime: ' + days + ' days', 'Languages: C, C++, Rust, Python, TypeScript',
       'Projects: ' + projects.length + ' pinned, 1 distributed', 'School: IIT Patna, class of 2028',
     ];
     const n = Math.max(art.length, info.length);
@@ -572,6 +594,8 @@ The page you asked for does not exist.</pre>
       '  man <project>      jump to a project',
       '  cd <project>       open its repo',
       '  cat about          print the description',
+      '  resume             open my resume (PDF)',
+      '  mail               write to me',
       '  whoami, uptime, date, uname, neofetch, history',
       '  theme [light|dark] switch theme',
       '  clear              clear this output',
@@ -592,9 +616,13 @@ The page you asked for does not exist.</pre>
     cat: (a) => {
       if (!a[0]) return 'cat: missing operand';
       if (/^about(\.txt)?$/i.test(a[0])) return ABOUT;
+      if (/^resume(\.pdf)?$/i.test(a[0])) return commands.resume();
+      if (/^depuc\.asc$/i.test(a[0])) return { text: 'the key is here: ', link: KEY };
       return 'cat: ' + a[0] + ': No such file or directory';
     },
     whoami: () => 'depuc',
+    resume: () => (openUrl(RESUME), { text: 'opening ', link: RESUME }),
+    mail: () => (openUrl('mailto:' + EMAIL), { text: 'opening ', link: 'mailto:' + EMAIL }),
     uptime: () => ' ' + new Date().toTimeString().slice(0, 8) + ' up ' + days + ' days,  1 user,  load average: 0.42, 0.42, 0.42',
     date: () => new Date().toString(),
     uname: (a) => a.includes('-a') ? 'Linux portfolio 2026.11-depuc #1 SMP PREEMPT_DYNAMIC x86_64 GNU/Linux' : 'Linux',
@@ -610,7 +638,7 @@ The page you asked for does not exist.</pre>
     q: () => { closePrompt(); return null; },
     // not in help
     sudo: (a) => a.join(' ').includes('hire')
-      ? 'depuc is not in the sudoers file. This incident will be reported.\n\n(Reaching out on GitHub works better. See SEE ALSO.)'
+      ? { text: 'depuc is not in the sudoers file. This incident will be reported.\n\n(Email works better: ', link: 'mailto:' + EMAIL }
       : '[sudo] password for guest:\nSorry, try again.',
     make: (a) => !a[0]
       ? 'make: *** No targets specified and no makefile found.  Stop.'
@@ -629,6 +657,15 @@ The page you asked for does not exist.</pre>
       openUrl(url);
       return { text: 'opening ', link: url };
     },
+    finger: () => [
+      'Login: depuc                           Name: Praveen Deepak Koripalli',
+      'Directory: /home/depuc                 Shell: /bin/zsh',
+      'Mail: ' + EMAIL,
+      'PGP key: ' + FPR,
+      'Plan:',
+      '  Ship flowd, get ember into more hands, land more patches in GLib.',
+    ].join('\n'),
+    gpg: () => ({ text: 'pub   rsa4096 2026-11-17 [SC]\n      ' + FPR + '\nuid   depuc <' + EMAIL + '>\n\n', link: KEY }),
     '404': () => { showSegv('/this-page'); return null; },
     ':q': () => 'E492: Not an editor command. Try q.',
     scanmem: () => { cashHack(); return null; },
@@ -703,7 +740,7 @@ The page you asked for does not exist.</pre>
   };
   const SECTION_TIP = {
     name: 'top', synopsis: 'top', description: 'top', environment: 'environment', options: 'options',
-    projects: 'projects', contributions: 'contributions', activity: 'activity', history: 'history', bugs: 'end', 'see-also': 'end',
+    projects: 'projects', contributions: 'contributions', activity: 'activity', history: 'history', bugs: 'end', author: 'end', 'see-also': 'end',
   };
   function currentTip() {
     let id = 'name';
