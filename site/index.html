@@ -15,7 +15,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>depuc(1) - Praveen Deepak Koripalli</title>
-<meta name="description" content="depuc (Praveen Deepak Koripalli): systems programmer. C, C++ and Rust projects, GNOME contributions, and a man page you can type into.">
+<meta name="description" content="depuc (Praveen Deepak Koripalli): systems programmer. C, C++, Rust and Python projects, LLM agents, GNOME contributions, and a man page you can type into.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Ctext x='4' y='22' font-family='monospace' font-size='16' fill='%23bdbdbd'%3E%3E_%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -219,7 +219,7 @@ html.crt body, html.crt .term, html.crt .overlay { text-shadow: 0 0 0.45em color
   <section class="sec" id="synopsis">
     <h2>SYNOPSIS</h2>
     <div class="body">
-      <p><b>depuc</b> [<b>--systems</b>] [<b>--rust</b>] [<b>--scripting</b>] [<b>--web</b>] [<b>--open-source</b>] <u>problem</u></p>
+      <p><b>depuc</b> [<b>--systems</b>] [<b>--rust</b>] [<b>--agents</b>] [<b>--scripting</b>] [<b>--web</b>] [<b>--open-source</b>] <u>problem</u></p>
     </div>
   </section>
 
@@ -227,6 +227,7 @@ html.crt body, html.crt .term, html.crt .overlay { text-shadow: 0 0 0.45em color
     <h2>DESCRIPTION</h2>
     <div class="body">
       <p>I like knowing how things work under the hood, and most of my projects start as a question I couldn't stop thinking about. How does a web server handle a thousand connections without a thousand threads? That became <a href="#hearth">hearth(8)</a>. What happens when a machine dies halfway through a job? That became <a href="#flowd">flowd(8)</a>. Why is the loudest error in an outage so rarely the cause? That became <a href="#logsleuth">logsleuth(1)</a>. I wanted to know how Redis and malloc actually work, so I wrote <a href="#redislite">redislite(8)</a> and <a href="#dumalloc">dumalloc(3)</a>.</p>
+      <p>Lately the question is how you trust an LLM agent. <a href="#evalkit">evalkit(1)</a> scores agent runs and fails CI when they get worse. <a href="#procureagent">procureagent(8)</a> and <a href="#research-crew">research-crew(8)</a> let the model reason and write while plain code checks it: policy decisions in one, citations in the other.</p>
       <p>I also want to build open source that's useful to people. <a href="#ember">ember(1)</a> puts Wikipedia and an AI model on a laptop, so someone in a remote area with bad or no internet can still look things up and ask questions, completely offline. I also send patches to GNOME, including GLib, the core library under nearly every GNOME app.</p>
     </div>
   </section>
@@ -249,10 +250,12 @@ html.crt body, html.crt .term, html.crt .overlay { text-shadow: 0 0 0.45em color
       <dl class="opts">
         <dt>--systems</dt><dd>C, C++17/20, POSIX sockets, poll(2), threads, lock-free atomics</dd>
         <dt>--rust</dt><dd>Rust, Tauri 2</dd>
-        <dt>--scripting</dt><dd>Python, Bash, awk, sed</dd>
-        <dt>--web</dt><dd>TypeScript, JavaScript, React, Node.js, Vite, Tailwind</dd>
-        <dt>--data</dt><dd>AWS (DynamoDB, S3, EC2), PostgreSQL, SQLite, SQL</dd>
-        <dt>--tooling</dt><dd>CMake, Meson, Make, GitHub Actions, GoogleTest, GDB, ASan/UBSan/TSan, Docker</dd>
+        <dt>--agents</dt><dd>LangGraph, Google ADK, CrewAI, Gemini, Vertex AI, RAG, LLM evaluation</dd>
+        <dt>--scripting</dt><dd>Python (FastAPI, Pydantic, pytest), Bash, awk, sed</dd>
+        <dt>--web</dt><dd>TypeScript, JavaScript, React, Node.js, Vite, Tailwind, Streamlit</dd>
+        <dt>--cloud</dt><dd>GCP (Cloud Run, Cloud Tasks, Vertex AI), AWS (DynamoDB, S3, EC2), Terraform</dd>
+        <dt>--data</dt><dd>PostgreSQL, SQLite, BigQuery, Firestore, Vector Search, SQL</dd>
+        <dt>--tooling</dt><dd>CMake, Meson, Make, GitHub Actions, GoogleTest, GDB, ASan/UBSan/TSan, Docker, OpenTelemetry</dd>
         <dt>--open-source</dt><dd>GNOME contributor: GLib, Epiphany, GNOME Logs</dd>
       </dl>
     </div>
@@ -266,6 +269,11 @@ html.crt body, html.crt .term, html.crt .overlay { text-shadow: 0 0 0.45em color
         <p>Runs DAGs of tasks across any number of worker processes that coordinate only through conditional writes to DynamoDB. Workers can crash at any moment: expired leases are reclaimed by the survivors, and fencing makes sure at most one result is ever committed per task.</p>
         <p class="meta"><span>C++20 · DynamoDB · CMake · CI</span><a href="https://github.com/depuc8/Flowd" target="_blank" rel="noopener">github.com/depuc8/Flowd</a></p>
       </article>
+      <article class="proj" id="evalkit">
+        <div class="proj-head"><span class="name"><b>evalkit</b>(1)</span><span class="what">evaluate and debug LLM agents</span></div>
+        <p>Records every agent run as a trace and scores it for accuracy, groundedness, safety, cost and tool use. It can replay a failed step with a different prompt or model, and it fails CI when results drop below a saved baseline. LangGraph first, with a pytest plugin.</p>
+        <p class="meta"><span>Python · LangGraph · pytest · on PyPI</span><a href="https://github.com/depuc8/EvalKit" target="_blank" rel="noopener">github.com/depuc8/EvalKit</a></p>
+      </article>
       <article class="proj" id="ember">
         <div class="proj-head"><span class="name"><b>ember</b>(1)</span><span class="what">offline knowledge archives with a local LLM</span></div>
         <p>Desktop app that reads Kiwix archives (Wikipedia, Project Gutenberg, Stack Exchange) and answers questions about them with a model running on your own machine. Nothing leaves the computer, and every answer cites the articles it used.</p>
@@ -275,6 +283,16 @@ html.crt body, html.crt .term, html.crt .overlay { text-shadow: 0 0 0.45em color
         <div class="proj-head"><span class="name"><b>hearth</b>(8)</span><span class="what">HTTP/1.1 server on bare POSIX sockets</span></div>
         <p>One poll(2) loop holds every idle keep-alive connection while a fixed pool of workers answers requests, so a thousand idle clients cost no threads. About 2,400 lines and 151 tests that run clean under ASan, UBSan and TSan.</p>
         <p class="meta"><span>C++17 · POSIX · CI · coverage</span><a href="https://github.com/depuc8/hearth" target="_blank" rel="noopener">github.com/depuc8/hearth</a></p>
+      </article>
+      <article class="proj" id="procureagent">
+        <div class="proj-head"><span class="name"><b>procureagent</b>(8)</span><span class="what">multi-agent procurement assistant</span></div>
+        <p>Describe a purchase and a planner hands it to vendor search, contract review and approval agents, then a critic loop checks the draft. Vendor ranking, contract risk and policy decisions are plain code the model can't override, so it can't recommend a vendor that policy rejected.</p>
+        <p class="meta"><span>Python · Google ADK · Gemini · BigQuery · Cloud Run</span><a href="https://github.com/depuc8/ProcureAgent" target="_blank" rel="noopener">github.com/depuc8/ProcureAgent</a></p>
+      </article>
+      <article class="proj" id="research-crew">
+        <div class="proj-head"><span class="name"><b>research-crew</b>(8)</span><span class="what">cited literature reviews from papers</span></div>
+        <p>Reader, analyst and writer agents pull papers from PDFs or arXiv, search them through Vertex AI Vector Search, and draft a literature review. Every [paper, page] citation is checked against the chunks the agents actually retrieved, and claims that fail are dropped.</p>
+        <p class="meta"><span>Python · CrewAI · Vertex AI · Terraform</span><a href="https://github.com/depuc8/CrewAI-Research-Crew" target="_blank" rel="noopener">github.com/depuc8/CrewAI-Research-Crew</a></p>
       </article>
       <article class="proj" id="redislite">
         <div class="proj-head"><span class="name"><b>redislite</b>(8)</span><span class="what">in-memory key-value server</span></div>
